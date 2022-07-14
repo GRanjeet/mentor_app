@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mentor_app/utils/app_string.dart';
+import '../../utils/app_string.dart';
 
 class StudentView extends StatelessWidget {
   const StudentView({Key? key}) : super(key: key);

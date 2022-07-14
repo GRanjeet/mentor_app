@@ -30,6 +30,7 @@ class LoginController extends GetxController {
       log('Email : $email');
       log('Password : $password');
 
+      // Comment:  login user using firbase auth.
       try {
         UserCredential userCredential = await auth.signInWithEmailAndPassword(
           email: email,
@@ -38,6 +39,7 @@ class LoginController extends GetxController {
         user = userCredential.user;
         log(user.toString());
 
+        // Comment:  Get the user data object from database using the userId.
         var collection = cloud.collection('users');
         var docSnapshot = await collection.doc(user!.uid).get();
 
@@ -47,6 +49,7 @@ class LoginController extends GetxController {
           userType = data?['type'];
         }
 
+        // Comment:  Routes the user accroding to the user type.
         if (userType == AppStrings.admin) Get.toNamed(AppRoutes.adminRoute);
         if (userType == AppStrings.teacher) Get.toNamed(AppRoutes.teacherRoute);
         if (userType == AppStrings.student) Get.toNamed(AppRoutes.studentRoute);
