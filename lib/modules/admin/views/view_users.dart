@@ -1,10 +1,16 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/view_users.controller.dart';
+
 import '../../../routes/app_routes.dart';
+import '../controllers/view_users_controller.dart';
 
 class ViewUsersView extends GetView<ViewUsersController> {
-  const ViewUsersView({Key? key}) : super(key: key);
+  final String teacherId;
+  final bool showStudents;
+
+  const ViewUsersView({this.teacherId = '', this.showStudents = false});
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +40,39 @@ class ViewUsersView extends GetView<ViewUsersController> {
                     ),
                     trailing: Icon(Icons.chevron_right_rounded),
                     onTap: () {
-                      if (controller.isTeacher.value) {
+                      if (showStudents) {
+                        Get.toNamed(
+                          AppRoutes.studentDetail,
+                          arguments: controller.studentsList[index],
+                        )!
+                            .then(
+                          (value) => {
+                            Get.put(ViewUsersController()),
+                            controller.getTeacherStudentsData(teacherId),
+                          },
+                        );
+                      } else if (controller.isTeacher.value) {
+                        log(controller.teachersList[index].toJson().toString());
+                        Get.toNamed(
+                          AppRoutes.teacherDetail,
+                          arguments: controller.teachersList[index],
+                        )!
+                            .then(
+                          (value) => {
+                            Get.put(ViewUsersController()),
+                            controller.getUsersData(),
+                          },
+                        );
                       } else {
                         Get.toNamed(
                           AppRoutes.studentDetail,
                           arguments: controller.studentsList[index],
+                        )!
+                            .then(
+                          (value) => {
+                            Get.put(ViewUsersController()),
+                            controller.getUsersData(),
+                          },
                         );
                       }
                     },

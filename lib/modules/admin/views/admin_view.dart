@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../../routes/app_routes.dart';
 import '../../../utils/app_string.dart';
 
@@ -23,7 +24,10 @@ class AdminView extends StatelessWidget {
                 trailing: Icon(Icons.chevron_right_rounded),
                 onTap: () => Get.toNamed(
                   AppRoutes.viewUsers,
-                  arguments: true,
+                  arguments: {
+                    'isTeacher': true,
+                    'showStudents': false,
+                  },
                 ),
               ),
             ),
@@ -33,7 +37,10 @@ class AdminView extends StatelessWidget {
                 trailing: Icon(Icons.chevron_right_rounded),
                 onTap: () => Get.toNamed(
                   AppRoutes.viewUsers,
-                  arguments: false,
+                  arguments: {
+                    'isTeacher': false,
+                    'showStudents': false,
+                  },
                 ),
               ),
             ),
@@ -55,6 +62,13 @@ class AdminView extends StatelessWidget {
                   AppRoutes.addUser,
                   arguments: false,
                 ),
+              ),
+            ),
+            Card(
+              child: ListTile(
+                title: Text(AppStrings.subjects),
+                trailing: Icon(Icons.chevron_right_rounded),
+                onTap: () => Get.toNamed(AppRoutes.subjectList),
               ),
             )
           ],

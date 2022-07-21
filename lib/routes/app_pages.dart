@@ -1,11 +1,15 @@
 import 'package:get/route_manager.dart';
+import 'package:mentor_app/modules/admin/bindings/subject_binding.dart';
+import 'package:mentor_app/modules/admin/views/subject_list_view.dart';
 
 import '../modules/admin/bindings/add_user_binding.dart';
 import '../modules/admin/bindings/student_detail_binding.dart';
+import '../modules/admin/bindings/teacher_detail_binding.dart';
 import '../modules/admin/bindings/view_users_binding.dart';
 import '../modules/admin/views/add_user.dart';
 import '../modules/admin/views/admin_view.dart';
 import '../modules/admin/views/student_detail_view.dart';
+import '../modules/admin/views/teacher_detail_view.dart';
 import '../modules/admin/views/view_users.dart';
 import '../modules/exam/bindings/exam_detail_binding.dart';
 import '../modules/exam/views/exam_detail_view.dart';
@@ -43,6 +47,16 @@ class AppPages {
       name: AppRoutes.viewUsers,
       page: () => ViewUsersView(),
       binding: ViewUsersBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.subjectList,
+      page: () => SubjectListView(),
+      binding: SubjectBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.teacherDetail,
+      page: () => TeacherDetailView(),
+      binding: TeacherDetailBinding(),
     ),
     GetPage(
       name: AppRoutes.studentDetail,

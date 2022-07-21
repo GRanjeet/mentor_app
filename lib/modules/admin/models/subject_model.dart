@@ -1,29 +1,29 @@
 class SubjectModel {
-  String? year;
-  String? sem;
-  String? name;
   String? code;
+  String? year;
+  String? name;
+  String? sem;
 
   SubjectModel({
-    this.year,
-    this.sem,
-    this.name,
     this.code,
+    this.year,
+    this.name,
+    this.sem,
   });
 
   SubjectModel.fromJson(Map<String, dynamic> json) {
-    year = json['year'];
-    sem = json['sem'];
-    name = json['name'];
     code = json['code'];
+    year = json['year'];
+    name = json['name'];
+    sem = json['sem'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['year'] = this.year;
-    data['sem'] = this.sem;
-    data['name'] = this.name;
     data['code'] = this.code;
+    data['year'] = this.year;
+    data['name'] = this.name;
+    data['sem'] = this.sem;
     return data;
   }
 }

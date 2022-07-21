@@ -43,7 +43,13 @@ class StudentDetailView extends GetView<StudentDetailController> {
                               ],
                             ),
                             SizedBox(height: 8),
-                            Text(controller.studentData.value.address!),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(controller.studentData.value.address!),
+                                Text(controller.studentData.value.teacherName!),
+                              ],
+                            ),
                           ],
                         ),
                       ),

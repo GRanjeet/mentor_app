@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-import '../controllers/view_users.controller.dart';
+import '../controllers/view_users_controller.dart';
 
 class ViewUsersBinding extends Bindings {
   @override

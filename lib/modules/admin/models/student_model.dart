@@ -1,7 +1,8 @@
 class StudentModel {
   List<Exams>? exams;
   String? address;
-  String? teacher;
+  String? teacherId;
+  String? teacherName;
   String? phone;
   String? year;
   List<Subjects>? subjects;
@@ -13,7 +14,8 @@ class StudentModel {
   StudentModel({
     this.exams,
     this.address,
-    this.teacher,
+    this.teacherId,
+    this.teacherName,
     this.phone,
     this.year,
     this.subjects,
@@ -31,7 +33,8 @@ class StudentModel {
       });
     }
     address = json['address'];
-    teacher = json['teacher'];
+    teacherId = json['teacherId'];
+    teacherName = json['teacherName'];
     phone = json['phone'];
     year = json['year'];
     if (json['subjects'] != null) {
@@ -57,7 +60,8 @@ class StudentModel {
       data['exams'] = this.exams!.map((v) => v.toJson()).toList();
     }
     data['address'] = this.address;
-    data['teacher'] = this.teacher;
+    data['teacherId'] = this.teacherId;
+    data['teacherName'] = this.teacherName;
     data['phone'] = this.phone;
     data['year'] = this.year;
     if (this.subjects != null) {

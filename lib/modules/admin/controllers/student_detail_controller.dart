@@ -24,7 +24,6 @@ class StudentDetailController extends GetxController {
   @override
   void onInit() {
     studentData.value = Get.arguments;
-    subjectsList.value = studentData.value.subjects!;
     print(jsonEncode(studentData.toJson().toString()));
     super.onInit();
   }
