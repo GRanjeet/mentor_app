@@ -41,10 +41,10 @@ class ViewUsersView extends GetView<ViewUsersController> {
                     trailing: Icon(Icons.chevron_right_rounded),
                     onTap: () {
                       if (showStudents) {
-                        Get.toNamed(
-                          AppRoutes.studentDetail,
-                          arguments: controller.studentsList[index],
-                        )!
+                        Get.toNamed(AppRoutes.studentDetail, arguments: {
+                          'studentData': controller.studentsList[index],
+                          'isStudent': false,
+                        })!
                             .then(
                           (value) => {
                             Get.put(ViewUsersController()),
@@ -66,7 +66,10 @@ class ViewUsersView extends GetView<ViewUsersController> {
                       } else {
                         Get.toNamed(
                           AppRoutes.studentDetail,
-                          arguments: controller.studentsList[index],
+                          arguments: {
+                            'studentData': controller.studentsList[index],
+                            'isStudent': false,
+                          },
                         )!
                             .then(
                           (value) => {

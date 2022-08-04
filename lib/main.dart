@@ -8,7 +8,7 @@ import 'routes/app_pages.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
-  // Comment:  irebase Initializations when the app starts.
+  // Comment:  Firebase Initializations when the app starts.
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

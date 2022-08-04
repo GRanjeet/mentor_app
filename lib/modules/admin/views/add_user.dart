@@ -73,24 +73,6 @@ class AddUserView extends GetView<AddUserController> {
                                 return null;
                               },
                             ),
-                          if (!controller.isTeacher.value) SizedBox(height: 16),
-                          if (!controller.isTeacher.value)
-                            DropdownButtonFormField<String>(
-                              value: controller.selectedClass.value.isEmpty
-                                  ? null
-                                  : controller.selectedClass.value,
-                              isDense: true,
-                              hint: Text('Class'),
-                              onChanged: (value) => controller.selectedClass.value = value!,
-                              validator: (value) => value == null ? 'Required*' : null,
-                              autovalidateMode: AutovalidateMode.onUserInteraction,
-                              items: controller.classList.map((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
-                            ),
                           if (controller.isTeacher.value && !controller.isStudyAdvisor.value)
                             DropdownButtonFormField<SubjectModel>(
                               value: controller.selectedSubject.value.name == null
@@ -110,6 +92,38 @@ class AddUserView extends GetView<AddUserController> {
                             ),
                           if (controller.isTeacher.value && !controller.isStudyAdvisor.value)
                             SizedBox(height: 16),
+                          if (!controller.isTeacher.value) SizedBox(height: 16),
+                          if (!controller.isTeacher.value)
+                            DropdownButtonFormField<String>(
+                              value: controller.selectedClass.value.isEmpty
+                                  ? null
+                                  : controller.selectedClass.value,
+                              hint: Text('Year'),
+                              isDense: true,
+                              onChanged: (value) => controller.selectedClass.value = value!,
+                              validator: (value) => value == null ? 'Required*' : null,
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
+                              items: controller.classList.map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                            ),
+                          if (!controller.isTeacher.value) SizedBox(height: 16),
+                          if (!controller.isTeacher.value)
+                            InkWell(
+                              onTap: () => controller.showMultiSelect(context),
+                              child: AbsorbPointer(
+                                absorbing: true,
+                                child: TextFormField(
+                                  decoration: InputDecoration(
+                                    hintText: 'Subjects',
+                                    suffixIcon: Icon(Icons.chevron_right),
+                                  ),
+                                ),
+                              ),
+                            ),
                           if (!controller.isTeacher.value) SizedBox(height: 16),
                           TextFormField(
                             controller: controller.emailTextController,

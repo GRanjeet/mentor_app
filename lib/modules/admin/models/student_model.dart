@@ -1,214 +1,94 @@
+import 'package:mentor_app/modules/exam/models/exam_model.dart';
+
+import 'subject_model.dart';
+
 class StudentModel {
-  List<Exams>? exams;
   String? address;
-  String? teacherId;
-  String? teacherName;
   String? phone;
   String? year;
-  List<Subjects>? subjects;
+  List<String>? subjectsIds;
   String? fullName;
   String? id;
+  List<Attendence>? attendence;
   String? email;
-  List<Attendance>? attendance;
+  List<ExamModel>? exams;
 
   StudentModel({
-    this.exams,
     this.address,
-    this.teacherId,
-    this.teacherName,
     this.phone,
-    this.year,
-    this.subjects,
+    this.subjectsIds,
     this.fullName,
     this.id,
+    this.attendence,
     this.email,
-    this.attendance,
+    this.exams,
   });
 
   StudentModel.fromJson(Map<String, dynamic> json) {
-    if (json['exams'] != null) {
-      exams = <Exams>[];
-      json['exams'].forEach((v) {
-        exams!.add(new Exams.fromJson(v));
-      });
-    }
-    address = json['address'];
-    teacherId = json['teacherId'];
-    teacherName = json['teacherName'];
-    phone = json['phone'];
-    year = json['year'];
-    if (json['subjects'] != null) {
-      subjects = <Subjects>[];
-      json['subjects'].forEach((v) {
-        subjects!.add(new Subjects.fromJson(v));
-      });
-    }
-    fullName = json['fullName'];
-    id = json['id'];
-    email = json['email'];
-    if (json['attendance'] != null) {
-      attendance = <Attendance>[];
-      json['attendance'].forEach((v) {
-        attendance!.add(new Attendance.fromJson(v));
-      });
-    }
+    this.address = json["address"];
+    this.phone = json["phone"];
+    this.year = json["year"];
+    this.subjectsIds = json["subjectsIds"] == null ? [] : List<String>.from(json["subjectsIds"]);
+    this.fullName = json["fullName"];
+    this.id = json["id"];
+    this.attendence = json["attendence"] == null
+        ? []
+        : (json["attendence"] as List).map((e) => Attendence.fromJson(e)).toList();
+    this.email = json["email"];
+    this.exams = json["exams"] == null
+        ? []
+        : (json["exams"] as List).map((e) => ExamModel.fromJson(e)).toList();
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.exams != null) {
-      data['exams'] = this.exams!.map((v) => v.toJson()).toList();
-    }
-    data['address'] = this.address;
-    data['teacherId'] = this.teacherId;
-    data['teacherName'] = this.teacherName;
-    data['phone'] = this.phone;
-    data['year'] = this.year;
-    if (this.subjects != null) {
-      data['subjects'] = this.subjects!.map((v) => v.toJson()).toList();
-    }
-    data['fullName'] = this.fullName;
-    data['id'] = this.id;
-    data['email'] = this.email;
-    if (this.attendance != null) {
-      data['attendance'] = this.attendance!.map((v) => v.toJson()).toList();
-    }
+    data["address"] = this.address;
+    data["phone"] = this.phone;
+    data["year"] = this.year;
+    if (this.subjectsIds != null) data["subjectsIds"] = this.subjectsIds;
+    data["fullName"] = this.fullName;
+    data["id"] = this.id;
+    if (this.attendence != null)
+      data["attendence"] = this.attendence!.map((e) => e.toJson()).toList();
+    data["email"] = this.email;
     return data;
   }
 }
 
-class Exams {
-  String? feedback;
-  String? examName;
-  String? totalMarks;
-  String? subjectCode;
-  String? scoredMarks;
-
-  Exams({
-    this.feedback,
-    this.examName,
-    this.totalMarks,
-    this.subjectCode,
-    this.scoredMarks,
-  });
-
-  Exams.fromJson(Map<String, dynamic> json) {
-    feedback = json['feedback'];
-    examName = json['examName'];
-    totalMarks = json['totalMarks'];
-    subjectCode = json['subjectCode'];
-    scoredMarks = json['scoredMarks'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['feedback'] = this.feedback;
-    data['examName'] = this.examName;
-    data['totalMarks'] = this.totalMarks;
-    data['subjectCode'] = this.subjectCode;
-    data['scoredMarks'] = this.scoredMarks;
-    return data;
-  }
-}
-
-class Subjects {
-  String? year;
-  List<Sem>? sem;
-
-  Subjects({
-    this.year,
-    this.sem,
-  });
-
-  Subjects.fromJson(Map<String, dynamic> json) {
-    year = json['year'];
-    if (json['sem'] != null) {
-      sem = <Sem>[];
-      json['sem'].forEach((v) {
-        sem!.add(new Sem.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['year'] = this.year;
-    if (this.sem != null) {
-      data['sem'] = this.sem!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
-
-class Sem {
-  List<SubList>? subList;
-  String? name;
-
-  Sem({
-    this.subList,
-    this.name,
-  });
-
-  Sem.fromJson(Map<String, dynamic> json) {
-    if (json['subList'] != null) {
-      subList = <SubList>[];
-      json['subList'].forEach((v) {
-        subList!.add(new SubList.fromJson(v));
-      });
-    }
-    name = json['name'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.subList != null) {
-      data['subList'] = this.subList!.map((v) => v.toJson()).toList();
-    }
-    data['name'] = this.name;
-    return data;
-  }
-}
-
-class SubList {
-  String? subCode;
-  String? subName;
-
-  SubList({
-    this.subCode,
-    this.subName,
-  });
-
-  SubList.fromJson(Map<String, dynamic> json) {
-    subCode = json['subCode'];
-    subName = json['subName'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['subCode'] = this.subCode;
-    data['subName'] = this.subName;
-    return data;
-  }
-}
-
-class Attendance {
+class Attendence {
   String? date;
-  String? isPresent;
+  SubjectModel? subject;
+  bool? isPresent;
+  String? startTime;
+  String? endTime;
+  String? classType;
 
-  Attendance({
+  Attendence({
     this.date,
+    this.subject,
     this.isPresent,
+    this.startTime,
+    this.endTime,
+    this.classType,
   });
 
-  Attendance.fromJson(Map<String, dynamic> json) {
-    date = json['date'];
-    isPresent = json['isPresent'];
+  Attendence.fromJson(Map<String, dynamic> json) {
+    this.date = json["date"];
+    this.subject = json["subject"] == null ? null : SubjectModel.fromJson(json["subject"]);
+    this.isPresent = json["isPresent"];
+    this.startTime = json["startTime"];
+    this.endTime = json["endTime"];
+    this.classType = json["classType"];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['date'] = this.date;
-    data['isPresent'] = this.isPresent;
+    data["date"] = this.date;
+    data["subject"] = this.subject!.toJson();
+    data["isPresent"] = this.isPresent;
+    data["startTime"] = this.startTime;
+    data["endTime"] = this.endTime;
+    data["classType"] = this.classType;
     return data;
   }
 }

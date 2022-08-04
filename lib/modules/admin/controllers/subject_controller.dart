@@ -11,6 +11,13 @@ class SubjectController extends GetxController {
   get isLoading => this._isLoading.value;
 
   final subjectsList = <SubjectModel>[].obs;
+  final fySubjectsList = <SubjectModel>[].obs;
+  final sySubjectsList = <SubjectModel>[].obs;
+  final tySubjectsList = <SubjectModel>[].obs;
+
+  final isFyExpanded = false.obs;
+  final isSyExpanded = false.obs;
+  final isTyExpanded = false.obs;
 
   @override
   void onInit() {
@@ -20,7 +27,10 @@ class SubjectController extends GetxController {
 
   void getSubjectsList() async {
     _isLoading.value = true;
-
+    subjectsList.value = [];
+    fySubjectsList.value = [];
+    sySubjectsList.value = [];
+    tySubjectsList.value = [];
     log('Getting subjects list...');
     final _db = FirebaseFirestore.instance.collection('subjects');
     try {
@@ -30,6 +40,16 @@ class SubjectController extends GetxController {
           log(jsonEncode(data).toString());
           subjectsList.add(SubjectModel.fromJson(data));
         });
+      });
+
+      subjectsList.forEach((sub) {
+        if (sub.year == 'FY') {
+          fySubjectsList.add(sub);
+        } else if (sub.year == 'SY') {
+          sySubjectsList.add(sub);
+        } else if (sub.year == 'TY') {
+          tySubjectsList.add(sub);
+        }
       });
     } catch (e) {
       log(e.toString());

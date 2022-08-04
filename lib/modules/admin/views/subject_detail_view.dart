@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../routes/app_routes.dart';
-import '../controllers/student_detail_controller.dart';
+import '../../student/controllers/student_detail_controller.dart';
 
 class SubjectDetailsView extends StatefulWidget {
   const SubjectDetailsView({Key? key}) : super(key: key);
@@ -91,6 +91,14 @@ class _SubjectDetailsViewState extends State<SubjectDetailsView> {
                           itemCount: controller.sySubjectDataList.length,
                           itemBuilder: (context, index) {
                             return ListTile(
+                              onTap: () => Get.toNamed(
+                                AppRoutes.examDetail,
+                                arguments: {
+                                  'studentId': controller.studentData.value.id,
+                                  'subjectCode': controller.sySubjectDataList[index].code,
+                                  'subjectName': controller.sySubjectDataList[index].name,
+                                },
+                              ),
                               visualDensity: VisualDensity.compact,
                               tileColor: Colors.white,
                               title: Row(
@@ -122,6 +130,14 @@ class _SubjectDetailsViewState extends State<SubjectDetailsView> {
                           itemCount: controller.tySubjectDataList.length,
                           itemBuilder: (context, index) {
                             return ListTile(
+                              onTap: () => Get.toNamed(
+                                AppRoutes.examDetail,
+                                arguments: {
+                                  'studentId': controller.studentData.value.id,
+                                  'subjectCode': controller.tySubjectDataList[index].code,
+                                  'subjectName': controller.tySubjectDataList[index].name,
+                                },
+                              ),
                               visualDensity: VisualDensity.compact,
                               tileColor: Colors.white,
                               title: Row(

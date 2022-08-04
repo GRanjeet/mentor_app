@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mentor_app/modules/admin/models/subject_model.dart';
 import 'package:mentor_app/modules/admin/models/teacher_model.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 import '../../../utils/app_string.dart';
 
@@ -30,6 +31,7 @@ class AddUserController extends GetxController {
   final selectedClass = ''.obs;
   final selectedTeacher = TeacherModel().obs;
   final selectedSubject = SubjectModel().obs;
+  final selectedSubjectList = <SubjectModel>[].obs;
 
   @override
   void onInit() {
@@ -39,149 +41,134 @@ class AddUserController extends GetxController {
     super.onInit();
   }
 
+  void showMultiSelect(BuildContext context) async {
+    var items = subjectsList.map((sub) => MultiSelectItem<SubjectModel>(sub, sub.name!)).toList();
+    await showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      builder: (ctx) {
+        return MultiSelectBottomSheet<SubjectModel>(
+          items: items,
+          initialChildSize: 0.75,
+          maxChildSize: 1.0,
+          initialValue: selectedSubjectList,
+          onConfirm: (values) {
+            selectedSubjectList.value = values;
+          },
+        );
+      },
+    );
+  }
+
   // Comment:  Add user to the database according to the give type.
   void addUser() async {
     if (formKey.currentState!.validate()) {
-      isLoading.value = true;
+      if (selectedSubjectList.length == 0 && !isTeacher.value) {
+        Get.rawSnackbar(message: 'Please select at least 1 Subject to comtinue');
+      } else {
+        isLoading.value = true;
 
-      User? user;
-      CollectionReference users = FirebaseFirestore.instance.collection('users');
-      CollectionReference collection = FirebaseFirestore.instance.collection(
-        isTeacher.value ? 'teachers' : 'students',
-      );
-      // Comment:  1st Create the given user in the firebase auth.
-      try {
-        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: emailTextController.text.trim(),
-          password: passwordTextController.text.trim(),
+        User? user;
+        CollectionReference users = FirebaseFirestore.instance.collection('users');
+        CollectionReference collection = FirebaseFirestore.instance.collection(
+          isTeacher.value ? 'teachers' : 'students',
         );
-
-        log('User Created : ${userCredential.toString()}');
-
-        user = userCredential.user;
-
-        // Comment:  Set the profile data.
-
-        Map<String, dynamic> profileData = {
-          "id": user?.uid,
-          "email": emailTextController.text.trim(),
-          "type": isTeacher.value ? AppStrings.teacher : AppStrings.student
-        };
-
-        // Comment:  Set the user data.
-
-        Map<String, dynamic> userData = {
-          "id": user?.uid,
-          "fullName": fullNameTextController.text.trim(),
-          "phone": phoneTextController.text.trim(),
-          "email": emailTextController.text.trim(),
-          if (isTeacher.value) "isAdvisor": isStudyAdvisor.value,
-          if (isTeacher.value && !isStudyAdvisor.value) "subject": selectedSubject.value.toJson(),
-          if (!isTeacher.value) "address": addressTextController.text.trim(),
-          if (!isTeacher.value) "year": selectedClass.value,
-          if (!isTeacher.value) "teacherName": selectedTeacher.value.fullName,
-          if (!isTeacher.value) "teacherId": selectedTeacher.value.id,
-        };
-
-        log('User Data : $userData');
-
-        // Comment:  2nd Add the user data to the database according to the type.
-        await users
-            .doc(user?.uid)
-            .set(profileData)
-            .then((value) => log("Profile Added"))
-            .catchError((error) => log("Failed to add profile: $error"));
-
-        await collection
-            .doc(user?.uid)
-            .set(userData)
-            .then((value) => log("User Added"))
-            .catchError((error) => log("Failed to add user: $error"));
-
-        if (!isTeacher.value) await addSubjects(user!);
-
-        Get.back();
-
-        Get.rawSnackbar(
-            title: 'Success',
-            message:
-                "${isTeacher.value ? AppStrings.teacher : AppStrings.student} created successfully",
-            backgroundColor: Colors.green);
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'weak-password') {
-          Get.rawSnackbar(
-            title: 'Error',
-            message: 'The password provided is too weak.',
+        // Comment:  1st Create the given user in the firebase auth.
+        try {
+          UserCredential userCredential =
+              await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: emailTextController.text.trim(),
+            password: passwordTextController.text.trim(),
           );
-        } else if (e.code == 'email-already-in-use') {
+
+          log('User Created : ${userCredential.toString()}');
+
+          user = userCredential.user;
+
+          // Comment:  Set the profile data.
+
+          Map<String, dynamic> profileData = {
+            "id": user?.uid,
+            "email": emailTextController.text.trim(),
+            "type": isTeacher.value ? AppStrings.teacher : AppStrings.student
+          };
+
+          // Comment:  Set the user data.
+          List<String> subsIds = [];
+          selectedSubjectList.forEach((element) {
+            subsIds.add(element.code!);
+          });
+
+          Map<String, dynamic> userData = {
+            "id": user?.uid,
+            "fullName": fullNameTextController.text.trim(),
+            "phone": phoneTextController.text.trim(),
+            "email": emailTextController.text.trim(),
+            if (isTeacher.value) "isAdvisor": isStudyAdvisor.value,
+            if (isTeacher.value && !isStudyAdvisor.value) "subject": selectedSubject.value.toJson(),
+            if (!isTeacher.value) "subjectsId": subsIds,
+            if (!isTeacher.value) "address": addressTextController.text,
+            if (!isTeacher.value) "year": selectedClass.value,
+            if (!isTeacher.value) "attendence": [],
+            if (!isTeacher.value) "exams": [],
+          };
+
+          log('User Data : $userData');
+
+          //  Comment:  2nd Add the user data to the database according to the type.
+
+          await users
+              .doc(user?.uid)
+              .set(profileData)
+              .then((value) => log("Profile Added"))
+              .catchError((error) => log("Failed to add profile: $error"));
+
+          await collection
+              .doc(user?.uid)
+              .set(userData)
+              .then((value) => log("User Added"))
+              .catchError((error) => log("Failed to add user: $error"));
+
+          if (!isTeacher.value) {
+            for (int i = 0; i < selectedSubjectList.length; i++) {
+              Map<String, dynamic> data = selectedSubjectList[i].toJson();
+              await collection
+                  .doc(user?.uid)
+                  .collection('subjects')
+                  .doc()
+                  .set(data)
+                  .then((value) => log("Subjects Added"))
+                  .catchError((error) => log("Failed to add subjects : $error"));
+            }
+          }
+
+          Get.back();
+
+          Get.rawSnackbar(
+              title: 'Success',
+              message:
+                  "${isTeacher.value ? AppStrings.teacher : AppStrings.student} created successfully",
+              backgroundColor: Colors.green);
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'weak-password') {
+            Get.rawSnackbar(
+              title: 'Error',
+              message: 'The password provided is too weak.',
+            );
+          } else if (e.code == 'email-already-in-use') {
+            Get.rawSnackbar(
+              title: 'Error',
+              message: 'The account already exists for that email.',
+            );
+          }
+        } catch (e) {
+          log(e.toString());
           Get.rawSnackbar(
             title: 'Error',
-            message: 'The account already exists for that email.',
+            message: 'Something went wrong!',
           );
         }
-      } catch (e) {
-        log(e.toString());
-        Get.rawSnackbar(
-          title: 'Error',
-          message: 'Something went wrong!',
-        );
-      }
-      isLoading.value = false;
-    }
-  }
-
-  Future addSubjects(User user) async {
-    CollectionReference collection = FirebaseFirestore.instance.collection('students');
-    List<SubjectModel> fySubData = [
-      SubjectModel(code: 'FY0101', name: 'Subject-1', year: 'FY', sem: '1'),
-      SubjectModel(code: 'FY0102', name: 'Subject-2', year: 'FY', sem: '1'),
-      SubjectModel(code: 'FY0201', name: 'Subject-3', year: 'FY', sem: '2'),
-      SubjectModel(code: 'FY0202', name: 'Subject-4', year: 'FY', sem: '2'),
-    ];
-    List<SubjectModel> sySubData = [
-      SubjectModel(code: 'SY0401', name: 'Subject-5', year: 'SY', sem: '4'),
-      SubjectModel(code: 'SY0402', name: 'Subject-6', year: 'SY', sem: '4'),
-      SubjectModel(code: 'SY0501', name: 'Subject-7', year: 'SY', sem: '5'),
-      SubjectModel(code: 'SY0502', name: 'Subject-8', year: 'SY', sem: '5'),
-    ];
-    List<SubjectModel> tySubData = [
-      SubjectModel(code: 'TY0501', name: 'Subject-9', year: 'TY', sem: '5'),
-      SubjectModel(code: 'TY0502', name: 'Subject-10', year: 'TY', sem: '5'),
-      SubjectModel(code: 'TY0601', name: 'Subject-11', year: 'TY', sem: '6'),
-      SubjectModel(code: 'TY0602', name: 'Subject-12', year: 'TY', sem: '6'),
-    ];
-    if (selectedClass.value == 'FY') {
-      for (int i = 0; i < fySubData.length; i++) {
-        Map<String, dynamic> data = fySubData[i].toJson();
-        await collection
-            .doc(user.uid)
-            .collection('subjects')
-            .doc()
-            .set(data)
-            .then((value) => log("Subjects Added"))
-            .catchError((error) => log("Failed to add subjects : $error"));
-      }
-    } else if (selectedClass.value == 'SY') {
-      for (int i = 0; i < sySubData.length; i++) {
-        Map<String, dynamic> data = sySubData[i].toJson();
-        await collection
-            .doc(user.uid)
-            .collection('subjects')
-            .doc()
-            .set(data)
-            .then((value) => log("Subjects Added"))
-            .catchError((error) => log("Failed to add subjects : $error"));
-      }
-    } else if (selectedClass.value == 'TY') {
-      for (int i = 0; i < tySubData.length; i++) {
-        Map<String, dynamic> data = tySubData[i].toJson();
-        await collection
-            .doc(user.uid)
-            .collection('subjects')
-            .doc()
-            .set(data)
-            .then((value) => log("Subjects Added"))
-            .catchError((error) => log("Failed to add subjects : $error"));
+        isLoading.value = false;
       }
     }
   }
@@ -214,7 +201,6 @@ class AddUserController extends GetxController {
     } catch (e) {
       log(e.toString());
     }
-
     isLoading.value = false;
   }
 }

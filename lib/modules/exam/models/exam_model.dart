@@ -5,6 +5,7 @@ class ExamModel {
   String? subName;
   String? examName;
   String? remark;
+  bool? isPassed;
 
   ExamModel({
     this.total,
@@ -13,6 +14,7 @@ class ExamModel {
     this.subName,
     this.examName,
     this.remark,
+    this.isPassed,
   });
 
   ExamModel.fromJson(Map<String, dynamic> json) {
@@ -22,6 +24,7 @@ class ExamModel {
     subName = json['subName'];
     examName = json['examName'];
     remark = json['remark'];
+    isPassed = json['isPassed'];
   }
 
   Map<String, dynamic> toJson() {
@@ -32,6 +35,7 @@ class ExamModel {
     data['subName'] = this.subName;
     data['examName'] = this.examName;
     data['remark'] = this.remark;
+    data['isPassed'] = this.isPassed;
     return data;
   }
 }

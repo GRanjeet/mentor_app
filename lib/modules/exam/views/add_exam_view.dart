@@ -79,6 +79,21 @@ class AddExamView extends StatelessWidget {
                             ),
                           ),
                           SizedBox(height: 16),
+                          DropdownButtonFormField<String>(
+                            value: controller.passed.value.isEmpty ? null : controller.passed.value,
+                            hint: Text('Passed'),
+                            isDense: true,
+                            onChanged: (value) => controller.passed.value = value!,
+                            validator: (value) => value == null ? 'Required*' : null,
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            items: controller.passedList.map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                          SizedBox(height: 16),
                           Container(
                             width: double.infinity,
                             height: 46,

@@ -1,9 +1,10 @@
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mentor_app/modules/student/controllers/student_detail_controller.dart';
+import 'package:mentor_app/modules/admin/models/student_model.dart';
 import 'package:mentor_app/modules/exam/models/exam_model.dart';
 
 class ExamDetailController extends GetxController {
@@ -16,7 +17,12 @@ class ExamDetailController extends GetxController {
   final studentId = ''.obs;
   final subjectCode = ''.obs;
   final subjectName = ''.obs;
+  final isPassed = false.obs;
   final examList = <ExamModel>[].obs;
+  final studentData = StudentModel().obs;
+
+  final passed = ''.obs;
+  final passedList = <String>['Yes', 'No'];
 
   final formkey = GlobalKey<FormState>();
   final examNameTextController = TextEditingController();
@@ -27,8 +33,10 @@ class ExamDetailController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    final studentController = Get.find<StudentDetailController>();
     var args = Get.arguments as Map<String, dynamic>;
     log(args.toString());
+    studentData.value = studentController.studentData.value;
     studentId.value = args['studentId'];
     subjectCode.value = args['subjectCode'];
     subjectName.value = args['subjectName'];
@@ -38,19 +46,20 @@ class ExamDetailController extends GetxController {
   void getExamList() async {
     _isLoading.value = true;
     examList.value = [];
-    await _db
-        .doc(studentId.value)
-        .collection("exams")
-        .where('code', isEqualTo: subjectCode.value)
-        .get()
-        .then(
+
+    await _db.doc(studentId.value).get().then(
       (value) {
-        value.docs.forEach((doc) {
-          log(jsonEncode(doc.data()).toString());
-          examList.add(ExamModel.fromJson(doc.data()));
-        });
+        studentData.value = StudentModel.fromJson(value.data() as Map<String, dynamic>);
       },
     );
+
+    if (studentData.value.exams != null) {
+      studentData.value.exams!.forEach((element) {
+        if (subjectCode.value == element.code) {
+          examList.add(element);
+        }
+      });
+    }
     _isLoading.value = false;
   }
 
@@ -64,14 +73,30 @@ class ExamDetailController extends GetxController {
         "scored": scoredTextController.text.trim(),
         "total": totalTextController.text.trim(),
         "remark": feedbackController.text.trim(),
+        "isPassed": passed.value == 'Yes' ? true : false,
       };
 
-      await _db.doc(studentId.value).collection("exams").add(data).then(
-            (value) => {
-              log('Exam Added'),
-              Get.back(),
-            },
+      // await _db.doc(studentId.value).collection("exams").add(data).then(
+      //       (value) => {
+      //         log('Exam Added'),
+      //         Get.back(),
+      //       },
+      //     );
+
+      try {
+        await _db.doc(studentId.value).update({
+          'exams': FieldValue.arrayUnion([data])
+        }).then((value) {
+          Get.back();
+          Get.rawSnackbar(
+            title: 'Success',
+            message: "Attendence added successfully",
+            backgroundColor: Colors.green,
           );
+        });
+      } catch (e) {
+        log(e.toString());
+      }
       _isLoading.value = false;
     }
   }

@@ -17,6 +17,20 @@ class ViewUsersController extends GetxController {
   var teachersList = <TeacherModel>[].obs;
   var studentsList = <StudentModel>[].obs;
 
+  var monthsList = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
   @override
   void onInit() {
     teachersList.value = [];
@@ -64,12 +78,31 @@ class ViewUsersController extends GetxController {
     isLoading.value = true;
     teachersList.value = [];
     studentsList.value = [];
-    await _db.where('teacherId', isEqualTo: teacherId).get().then((value) {
-      value.docs.forEach((doc) {
-        var data = doc.data();
-        studentsList.add(StudentModel.fromJson(data));
+
+    if (teacherData.value.isAdvisor!) {
+      await _db.get().then((value) {
+        value.docs.forEach((doc) {
+          var data = doc.data();
+          log(jsonEncode(data).toString());
+          studentsList.add(StudentModel.fromJson(data));
+        });
       });
-    });
+    } else {
+      await _db
+          .where(
+            'subjectsIds',
+            arrayContains: teacherData.value.subject!.code,
+          )
+          .get()
+          .then((value) {
+        value.docs.forEach((doc) {
+          var data = doc.data();
+          log(jsonEncode(data).toString());
+          studentsList.add(StudentModel.fromJson(data));
+        });
+      });
+    }
+
     isLoading.value = false;
   }
 }
