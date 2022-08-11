@@ -1,4 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get/get.dart';
+import 'package:mentor_app/modules/student/views/help_view.dart';
+import 'package:mentor_app/modules/student/views/weekly_report.dart';
+import 'package:mentor_app/modules/teacher/views/feedback_view.dart';
+import 'package:mentor_app/routes/app_routes.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
 class LocalNotificationService {
@@ -51,17 +58,46 @@ class LocalNotificationService {
     required int id,
     required String title,
     required String body,
+    String? payload,
   }) async {
     final details = await _notificationDetails();
-    await _localNotificationService.show(id, title, body, details);
+    await _localNotificationService.show(
+      id,
+      title,
+      body,
+      details,
+      payload: payload,
+    );
   }
 
-  void onDidReceiveLocalNotification(int id, String? title, String? body, String? payload) {
-    print('id $id');
+  void onDidReceiveLocalNotification(
+    int id,
+    String? title,
+    String? body,
+    String? payload,
+  ) {
+    log('Notificatio ID $id');
   }
 
   void onSelectNotification(String? payload) {
-    print('payload $payload');
-    if (payload != null && payload.isNotEmpty) {}
+    log('Payload : $payload');
+    if (payload != null || payload!.isNotEmpty) {
+      if (payload == NotificationKeys.attendenceKey) {
+        Get.toNamed(AppRoutes.attendence);
+      } else if (payload == NotificationKeys.issueKey) {
+        Get.to(() => FeedbackView());
+      } else if (payload == NotificationKeys.helpKey) {
+        Get.to(() => HelpView());
+      } else if (payload == NotificationKeys.weeklyKey) {
+        Get.to(() => WeeklyReport(showDialog: true));
+      }
+    }
   }
+}
+
+class NotificationKeys {
+  static String attendenceKey = 'AttendenceKey';
+  static String issueKey = 'IssueKey';
+  static String helpKey = 'HelpKey';
+  static String weeklyKey = 'WeeklyKey';
 }

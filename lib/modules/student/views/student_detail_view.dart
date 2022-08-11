@@ -91,14 +91,6 @@ class StudentDetailView extends GetView<StudentDetailController> {
                           onTap: () => Get.to(AskForHelp()),
                         ),
                       ),
-                    if (controller.isStudent.value)
-                      Card(
-                        child: ListTile(
-                          title: Text('Notification'),
-                          trailing: Icon(Icons.chevron_right_rounded),
-                          onTap: () {},
-                        ),
-                      ),
                   ],
                 ),
               ),

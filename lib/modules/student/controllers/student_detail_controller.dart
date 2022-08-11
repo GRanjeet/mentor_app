@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -7,11 +8,13 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mentor_app/modules/admin/models/teacher_model.dart';
 import 'package:mentor_app/modules/student/model/issue_model.dart';
+import 'package:mentor_app/modules/student/views/weekly_report.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../utils/notification_service.dart';
 import '../../admin/models/student_model.dart';
 import '../../admin/models/subject_model.dart';
+import '../../teacher/model/chat_model.dart';
 
 class StudentDetailController extends GetxController {
   final _db = FirebaseFirestore.instance.collection('students');
@@ -32,8 +35,13 @@ class StudentDetailController extends GetxController {
   final selectedSubject = SubjectModel().obs;
 
   final issueFormKey = GlobalKey<FormState>();
+  final reportFormKey = GlobalKey<FormState>();
+
   final titleTextController = TextEditingController();
   final msgTextController = TextEditingController();
+  final chatMsgTextController = TextEditingController();
+  final chatList = <ChatModel>[].obs;
+  final selectedIssue = IssueModel().obs;
 
   final isFyExpanded = false.obs;
   final isSyExpanded = false.obs;
@@ -56,9 +64,25 @@ class StudentDetailController extends GetxController {
     'Second Year',
     'Third Year',
   ];
+
+  final ratingList = [
+    "Excellent",
+    "Good",
+    "Unsatisfactory",
+  ];
+
+  final selectedRating1 = ''.obs;
+  final selectedRating2 = ''.obs;
+  final selectedRating3 = ''.obs;
+  final selectedRating4 = ''.obs;
+  final selectedRating5 = ''.obs;
+  final selectedRating6 = ''.obs;
+
   late final LocalNotificationService service;
   @override
   void onInit() {
+    service = LocalNotificationService();
+    service.intialize();
     studentData.value = Get.arguments['studentData'];
     isStudent.value = Get.arguments['isStudent'];
     log(jsonEncode(studentData.toJson().toString()));
@@ -67,18 +91,73 @@ class StudentDetailController extends GetxController {
     getIssuesList();
     getSubjectList();
     calculatedPerformance();
-    service = LocalNotificationService();
-    service.intialize();
-    loadData();
+    if (isStudent.value) generateAttendanceNotifications();
+    if (isStudent.value) showWeeklyNotification();
     super.onInit();
   }
 
-  void loadData() async {
-    await service.showNotification(
-      id: 0,
-      title: 'Notification Title',
-      body: 'Some body',
-    );
+  void showWeeklyNotification() async {
+    var day = DateTime.now().weekday;
+    log('Week Day : $day');
+
+    if (day == DateTime.monday) {
+      await service.showNotification(
+        id: math.Random().nextInt(1000),
+        title: 'Weekly Progress',
+        body: 'Please provide your last week progress.',
+        payload: NotificationKeys.weeklyKey,
+      );
+    }
+  }
+
+  void showWeeklyDialog() {
+    Get.dialog(WeeklyDialog());
+  }
+
+  void saveWeeklyReportData() async {
+    if (reportFormKey.currentState!.validate()) {
+      Get.back();
+      Get.back();
+
+      final _db = FirebaseFirestore.instance.collection('students');
+      var id = Uuid().v1();
+      var dateTime = DateFormat('dd-MM-yyyy hh:mm').format(DateTime.now());
+
+      if (selectedRating1.value == ratingList[2] ||
+          selectedRating2.value == ratingList[2] ||
+          selectedRating6.value == ratingList[2]) {
+        await service.showNotification(
+          id: math.Random().nextInt(1000),
+          title: 'Alert!',
+          body: 'Please check the given resources.',
+          payload: NotificationKeys.helpKey,
+        );
+      }
+
+      Map<String, dynamic> data = {
+        "id": id,
+        "createdAt": dateTime,
+        "health": selectedRating1.value,
+        "behaviour": selectedRating2.value,
+        "reading": selectedRating3.value,
+        "writing": selectedRating4.value,
+        "workHabit": selectedRating5.value,
+        "socialHabit": selectedRating6.value,
+      };
+
+      try {
+        await _db.doc(studentData.value.id).collection("reports").doc(id).set(data).then(
+          (value) {
+            Get.rawSnackbar(
+              message: 'Report added sucessfuly',
+              backgroundColor: Colors.green,
+            );
+          },
+        );
+      } catch (e) {
+        log(e.toString());
+      }
+    }
   }
 
   void getStudentData() async {
@@ -214,9 +293,10 @@ class StudentDetailController extends GetxController {
             var teacher = TeacherModel.fromJson(doc.data());
             sendToTeacher(teacher.id!, data, id);
             await service.showNotification(
-              id: 0,
-              title: issue.title!,
-              body: issue.msg!,
+              id: math.Random().nextInt(1000),
+              title: 'Alert!',
+              body: 'Please check the given resources.',
+              payload: NotificationKeys.helpKey,
             );
           });
         });
@@ -239,6 +319,82 @@ class StudentDetailController extends GetxController {
     await _teachersDB.doc(id).collection('notifications').doc(issueId).set(data).then((value) {
       log('Notification sended.....');
     });
+  }
+
+  void generateAttendanceNotifications() async {
+    int attCount = 0;
+
+    if (studentData.value.attendence!.isNotEmpty) {
+      studentData.value.attendence!.sort(((a, b) {
+        int aDate = DateFormat("yyyy-MM-dd").parse(a.date ?? '').microsecondsSinceEpoch;
+        int bDate = DateFormat("yyyy-MM-dd").parse(b.date ?? '').microsecondsSinceEpoch;
+        return aDate.compareTo(bDate);
+      }));
+
+      studentData.value.attendence!.forEach((element) async {
+        if (!element.isPresent!) {
+          attCount = attCount + 1;
+          if (attCount == 3) {
+            await service.showNotification(
+              id: math.Random().nextInt(1000),
+              title: 'Attendance Report',
+              body:
+                  'Hi, you have been absent from last 3 days so, please report to your respective teacher.',
+              payload: NotificationKeys.attendenceKey,
+            );
+          }
+        } else {
+          attCount = 0;
+        }
+        log('Attendance : ${attCount.toString()}');
+      });
+    }
+  }
+
+  Stream<List<ChatModel>> chatsStream() {
+    final _studentsDB = FirebaseFirestore.instance.collection('students');
+    return _studentsDB
+        .doc(studentData.value.id)
+        .collection('issues')
+        .doc(selectedIssue.value.id)
+        .collection('chats')
+        .snapshots()
+        .map((value) {
+      List<ChatModel> list = [];
+      value.docs.forEach((hint) {
+        var data = hint.data();
+        log(jsonEncode(data));
+        list.add(ChatModel.fromJson(data));
+      });
+      chatList.value = list;
+      chatList.sort(((a, b) {
+        int aDate =
+            DateFormat("yyyy-MM-dd hh:mm:ss").parse(a.timeStamp ?? '').microsecondsSinceEpoch;
+        int bDate =
+            DateFormat("yyyy-MM-dd hh:mm:ss").parse(b.timeStamp ?? '').microsecondsSinceEpoch;
+        return aDate.compareTo(bDate);
+      }));
+      return list;
+    });
+  }
+
+  void sendChat() async {
+    if (chatMsgTextController.text.isNotEmpty) {
+      final _studentsDB = FirebaseFirestore.instance.collection('students');
+      var chat = ChatModel(
+        timeStamp: DateTime.now().toString(),
+        isMe: true,
+        msg: chatMsgTextController.text.trim(),
+      );
+      Map<String, dynamic> data = chat.toJson();
+      chatMsgTextController.clear();
+      await _studentsDB
+          .doc(studentData.value.id)
+          .collection('issues')
+          .doc(selectedIssue.value.id)
+          .collection('chats')
+          .add(data);
+    }
   }
 
   Color currentProgressColor(double progress) {

@@ -1,26 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mentor_app/modules/student/controllers/student_detail_controller.dart';
-import 'package:mentor_app/modules/student/views/add_issues_view.dart';
-import 'package:mentor_app/modules/student/views/student_issue_detail_view.dart';
+import 'package:mentor_app/modules/teacher/controllers/teacher_detail_controller.dart';
+import 'package:mentor_app/modules/teacher/views/issue_detail_view.dart';
 
-class AskForHelp extends StatelessWidget {
-  const AskForHelp({Key? key}) : super(key: key);
+class FeedbackView extends GetView<TeacherDetailController> {
+  const FeedbackView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<StudentDetailController>();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ask for Help'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => Get.to(AddIssuesView())!.then(
-              (value) => controller.getIssuesList(),
-            ),
-          ),
-        ],
+        title: const Text('Issues/Help'),
       ),
       body: Obx(
         () => controller.isLoading.value
@@ -36,7 +26,9 @@ class AskForHelp extends StatelessWidget {
                       return ListTile(
                         onTap: () {
                           controller.selectedIssue.value = issue;
-                          Get.to(() => StudentIssueDetailView());
+                          controller.updateIssueStatus();
+                          controller.getStudentDetails();
+                          Get.to(() => IssueDetailView());
                         },
                         visualDensity: VisualDensity.comfortable,
                         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -45,27 +37,9 @@ class AskForHelp extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                issue.title ?? '',
+                                issue.issue!.title ?? '',
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 2,
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(6),
-                              alignment: Alignment.centerRight,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4),
-                                color: issue.forAdvisor!
-                                    ? Colors.blue.withOpacity(0.1)
-                                    : Colors.green.withOpacity(0.1),
-                              ),
-                              child: Text(
-                                issue.forAdvisor! ? 'Advisor' : 'Teacher',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: issue.forAdvisor! ? Colors.blue : Colors.green,
-                                ),
                               ),
                             ),
                           ],
@@ -76,7 +50,7 @@ class AskForHelp extends StatelessWidget {
                             Padding(
                               padding: EdgeInsets.symmetric(vertical: 12),
                               child: Text(
-                                issue.msg ?? '-',
+                                issue.issue!.msg ?? '-',
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -85,9 +59,11 @@ class AskForHelp extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  issue.forAdvisor! ? issue.issueType! : issue.subject!.name ?? '-',
+                                  issue.issue!.forAdvisor!
+                                      ? issue.issue!.issueType!
+                                      : issue.issue!.subject!.name ?? '-',
                                 ),
-                                Text(issue.createdAt ?? '-'),
+                                Text(issue.issue!.createdAt ?? '-'),
                               ],
                             )
                           ],

@@ -53,10 +53,10 @@ class ViewUsersView extends GetView<ViewUsersController> {
                         );
                       } else if (controller.isTeacher.value) {
                         log(controller.teachersList[index].toJson().toString());
-                        Get.toNamed(
-                          AppRoutes.teacherDetail,
-                          arguments: controller.teachersList[index],
-                        )!
+                        Get.toNamed(AppRoutes.teacherDetail, arguments: {
+                          'teacherData': controller.teachersList[index],
+                          'isTeacher': false,
+                        })!
                             .then(
                           (value) => {
                             Get.put(ViewUsersController()),

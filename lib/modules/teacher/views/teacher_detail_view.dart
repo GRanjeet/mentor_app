@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:mentor_app/modules/admin/bindings/view_users_binding.dart';
 import 'package:mentor_app/modules/admin/views/view_users.dart';
 import 'package:mentor_app/modules/teacher/controllers/teacher_detail_controller.dart';
-import 'package:mentor_app/utils/app_string.dart';
+import 'package:mentor_app/modules/teacher/views/feedback_view.dart';
 
 import '../../admin/controllers/view_users_controller.dart';
 
@@ -53,7 +53,7 @@ class TeacherDetailView extends GetView<TeacherDetailController> {
                     ),
                     Card(
                       child: ListTile(
-                        title: Text(AppStrings.viewAllStudent),
+                        title: Text('Students'),
                         trailing: Icon(Icons.chevron_right_rounded),
                         onTap: () async {
                           await Get.delete<ViewUsersController>();
@@ -72,12 +72,16 @@ class TeacherDetailView extends GetView<TeacherDetailController> {
                         },
                       ),
                     ),
-                    Card(
-                      child: ListTile(
-                        title: Text('View All Feedbacks'),
-                        trailing: Icon(Icons.chevron_right_rounded),
+                    if (controller.isTeacher.value)
+                      Card(
+                        child: ListTile(
+                          title: Text('Issues/Help'),
+                          trailing: Icon(Icons.chevron_right_rounded),
+                          onTap: () async {
+                            Get.to(() => FeedbackView());
+                          },
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
